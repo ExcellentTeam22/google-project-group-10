@@ -3,7 +3,7 @@ import os
 path = 'Archive'
 
 
-class File_Reader ():
+class FileReader:
     def __init__(self, folder_name):
         self.folder_name = folder_name
         self.file_content = {}
