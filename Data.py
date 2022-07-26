@@ -2,7 +2,7 @@ import os
 import re
 from LettersTrie import LettersTrie
 
-DIR_PATH = 'Archive'
+DIR_PATH = 'Test'
 
 
 class Data:
