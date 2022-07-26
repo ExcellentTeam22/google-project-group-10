@@ -1,13 +1,15 @@
 import os
 import re
-from LettersTrie import LettersTrie
+from LettersTrie import Trie
 
 DIR_PATH = 'Test'
 
 
 class Data:
     def __init__(self,):
-        self.root = LettersTrie()
+        self.trie = Trie()
+        self.files_dic = {}
+
         self.read_data()
 
     def read_data(self):
@@ -20,11 +22,19 @@ class Data:
         for i, line in enumerate(file):
             for word in re.split(r"[^a-zA-Z]+", line):
                 if word != '':
-                    self.root.append(word, path, i)
+                    hash_path = hash(path)
+                    self.files_dic[hash_path] = path
+                    self.trie.insert(word, hash_path, i)
+
+
+#def get_hashed(lst):
 
 
 if __name__ == "__main__":
     data = Data()
     print("done")
-    print(data.root.get("hello"))
+    tr = data.trie
+    #print (tr.search ("here"))
+    print (tr.searchExactWord ("here"))
+    print (tr.searchExactWord ("hello"))
 
