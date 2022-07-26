@@ -20,7 +20,7 @@ class Data:
         for i, line in enumerate(file):
             for word in re.split(r"[^a-zA-Z]+", line):
                 if word != '':
-                    self.root.append(word, path, i)
+                    self.root.insert(word, path, i)
 
 
 if __name__ == "__main__":
