@@ -1,102 +1,72 @@
 from __future__ import annotations
 import numpy as np
 
-"""class LettersTrie:
-    def __init__(self, prev: LettersTrie = None):
-        self.next = {}
-        self.prev = prev
-        self.content = set()
-
-    def append(self, new_word: LettersTrie, path: str, line: str) -> None:
-        if len(new_word) == 0:
-            self.content.add(f"{path} \n {line}")
-        else:
-            if new_word[0] not in self.next:
-                self.next[new_word[0]] = LettersTrie(self)
-            self.next[new_word[0]].append(new_word[1:], path, line)
-
-    def get(self, word: str, distance: int = 0) -> list:
-        if word == "":
-            return self.content
-        if word[0] not in self.next:
-            return None
-        else:
-            return self.next[word[0]].get(word[1:])
-"""
-"""
-if __name__ == "__main__":
-    data = LettersTrie()
-    data.append("123", "111", "222")
-    data.append("123", "5555", "7777")
-    print(data.get("12"))"""
-
 
 class TrieNode:
-
-    def __init__(self, char):
+    def __init__(self, char: str, prev:TrieNode = None):
         self.char = char
-
         self.is_end = False
-
         self.children = {}
         self.content = set()
+        self.prev = prev
+        self.is_common = False
 
 
 class Trie (object):
-
     def __init__(self):
-
-        self.root = TrieNode ("")
+        self.root = TrieNode("")
+        self.words_counter = 0
 
     def insert(self, word, path: int, line: int) -> None:
-
         node = self.root
-
         for char in word:
             if char in node.children:
                 node = node.children[char]
             else:
-                new_node = TrieNode (char)
+                self.words_counter += 1
+                new_node = TrieNode(char)
                 node.children[char] = new_node
                 node = new_node
-        node.content.add (np.array([path,line],dtype='int64'))
+        node.content.add(tuple(np.array([path, line])))
         node.is_end = True
+        if len(node.content) > int(np.sqrt(self.words_counter)):
+            node.is_common = True
 
     def dfs(self, node, pre):
-
         if node.is_end:
-            self.output.append ([(pre + node.char), node.content])
+            self.output.append([(pre + node.char), node.content])
+        for child in node.children.values():
+            self.dfs(child, pre + node.char)
 
-        for child in node.children.values ():
-            self.dfs (child, pre + node.char)
-
-    def search(self, x):
-
+    def search(self, searched_word):
         node = self.root
-
-        for char in x:
+        for char in searched_word:
             if char in node.children:
                 node = node.children[char]
             else:
-
                 return []
-
         self.output = []
-        self.dfs (node, x[:-1])
-
+        self.dfs(node, searched_word[:-1])
         return self.output
 
-    def searchExactWord(self, x):
-
+    def search_exact_word(self, word: str) -> tuple:
         node = self.root
-
-        for char in x:
+        for char in word:
             if char in node.children:
                 node = node.children[char]
             else:
-
                 return []
+        return word, node.content
 
-        return (x, node.content)
+    def get_bfs_start(self, word: str) -> TrieNode:
+        node = self.root
+        for char in word:
+            if char in node.children:
+                node = node.children[char]
+            else:
+                return None
+        return node
 
-
+    def bfs(self):
+        node = self.get_bfs_start()
+        ans = set((node))
