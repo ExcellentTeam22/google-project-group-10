@@ -24,17 +24,10 @@ class Data:
                 if word != '':
                     hash_path = hash(path)
                     self.files_dic[hash_path] = path
-                    self.trie.insert(word, hash_path, i)
+                    self.trie.insert(word, hash_path, i+1)
 
 
 #def get_hashed(lst):
 
 
-if __name__ == "__main__":
-    data = Data()
-    print("done")
-    tr = data.trie
-    #print (tr.search ("here"))
-    print (tr.searchExactWord ("here"))
-    print (tr.searchExactWord ("hello"))
 

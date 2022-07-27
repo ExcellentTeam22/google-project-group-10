@@ -42,11 +42,11 @@ class TrieNode:
         self.content = set()
 
 
-class Trie (object):
+class Trie(object):
 
     def __init__(self):
 
-        self.root = TrieNode ("")
+        self.root = TrieNode("")
 
     def insert(self, word, path: int, line: int) -> None:
 
@@ -56,19 +56,19 @@ class Trie (object):
             if char in node.children:
                 node = node.children[char]
             else:
-                new_node = TrieNode (char)
+                new_node = TrieNode(char)
                 node.children[char] = new_node
                 node = new_node
-        node.content.add (np.array([path,line],dtype='int64'))
+        node.content.add(tuple(np.array([path, line], dtype='int64')))
         node.is_end = True
 
     def dfs(self, node, pre):
 
         if node.is_end:
-            self.output.append ([(pre + node.char), node.content])
+            self.output.append([(pre + node.char), node.content])
 
-        for child in node.children.values ():
-            self.dfs (child, pre + node.char)
+        for child in node.children.values():
+            self.dfs(child, pre + node.char)
 
     def search(self, x):
 
@@ -82,7 +82,7 @@ class Trie (object):
                 return []
 
         self.output = []
-        self.dfs (node, x[:-1])
+        self.dfs(node, x[:-1])
 
         return self.output
 
@@ -98,5 +98,3 @@ class Trie (object):
                 return []
 
         return (x, node.content)
-
-
