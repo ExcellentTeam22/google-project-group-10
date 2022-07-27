@@ -40,30 +40,30 @@ class Trie (object):
     def search(self, searched_word, prefix: bool = False, start_node: TrieNode = None, penalty: int = 0):
         node = self.root if start_node is None else start_node
         ans = set()
-        if node.char == "W" and searched_word == "here":
-            print("whar")
         if searched_word == "":
             if len(node.content) != 0 and searched_word == "":
-                ans.add((node.char, tuple(node.content)))
+                yield {(node.char, tuple(node.content))}
             if prefix:
                 for curr_node, curr_word_prefix in self.dfs_sub_tries(node, searched_word[:1]):
-                    print(curr_word_prefix)
-                    ans.add([curr_word_prefix, curr_node.content])
+                    yield {(curr_word_prefix, curr_node.content)}
             return ans
         elif penalty < MAX_PENALTY:
-            ans = ans.union(self.get_penaltied_words(searched_word, prefix, node, penalty))
+            for word in self.get_penaltied_words(searched_word, prefix, node, penalty):
+                yield word
         if searched_word[0] in node.children:
-            ans = ans.union(self.search(searched_word[1:], prefix, node.children[searched_word[0]], penalty))
-        return ans
+            for res in self.search(searched_word[1:], prefix, node.children[searched_word[0]], penalty):
+                yield res
 
     def get_penaltied_words(self, searched_word: str, prefix: bool, node: TrieNode, penalty: int):
         ans = set()
         for node_key in node.children:
             # add char
-            ans = ans.union(self.search(searched_word, prefix, node.children[node_key], penalty + 1))
+            for word in self.search(searched_word, prefix, node.children[node_key], penalty + 1):
+                yield word
             if searched_word != "" and node != searched_word[0]:
                 # switch char
-                ans = ans.union(self.search(searched_word[1:], prefix, node.children[node_key], penalty + 1))
+                for word in self.search(searched_word[1:], prefix, node.children[node_key], penalty + 1):
+                    yield word
         # del char
-        ans = ans.union(self.search(searched_word[1:], prefix, node, penalty + 1))
-        return ans
+        for word in self.search(searched_word[1:], prefix, node, penalty + 1):
+            yield word
