@@ -17,9 +17,6 @@ def get_best_k_completions(prefix: str, data: Data) -> List[AutoCompleteData]:
     findings_list = [letter_trie.search(word) for word in sentence_word_list]
     results = []
     words = [next(gen) for gen in findings_list]
-    # findings_list = [letter_trie.searchExactWord(word) for index, word in enumerate(sentence_word_list)
-    #                 if index < len(sentence_word_list)-1]  # find each word in the trie
-    # findings_list.append(letter_trie.search(sentence_word_list[-1]))
     founds = [list(lst[1]) for lst in words]
     results.extend(intersect([item for item in founds]))  # intersect between results
     fixed_sentence = ' '.join([res[0] for res in words])  # build the new fixed sentence
@@ -43,10 +40,8 @@ def intersect(arrays):
 
 def find_in_file(res: list, files_hash, fixed_sent: str):
     lst = []
-    print(res)
-    for item in res:
-        print(item)
 
+    for item in res:
         no_row = item[1]
         line_to_check = lc.getline(files_hash[item[0]], no_row)
         if line_to_check.find(fixed_sent):
