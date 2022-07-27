@@ -24,7 +24,7 @@ class Data:
                 if word != '':
                     hash_path = hash(path)
                     self.files_dic[hash_path] = path
-                    self.trie.insert(word, hash_path, i)
+                    self.trie.insert(word, hash_path, i+1)
 
 
 #def get_hashed(lst):
