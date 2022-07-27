@@ -5,7 +5,6 @@ import numpy as np
 class TrieNode:
     def __init__(self, char: str, prev:TrieNode = None):
         self.char = char
-        self.is_end = False
         self.children = {}
         self.content = set()
         self.prev = prev
@@ -24,19 +23,18 @@ class Trie (object):
                 node = node.children[char]
             else:
                 self.words_counter += 1
-                new_node = TrieNode(char)
+                new_node = TrieNode(char, self)
                 node.children[char] = new_node
                 node = new_node
         node.content.add(tuple(np.array([path, line])))
-        node.is_end = True
-        if len(node.content) > int(np.sqrt(self.words_counter)):
-            node.is_common = True
+        node.is_common = True
 
-    def dfs(self, node, pre):
-        if node.is_end:
-            self.output.append([(pre + node.char), node.content])
+    def dfs_sub_trie(self, node, pre):
+        if len(node.content) != 0:
+            yield node, pre + node.char
         for child in node.children.values():
-            self.dfs(child, pre + node.char)
+            yield self.dfs(child, pre + node.char)
+        return
 
     def search(self, searched_word):
         node = self.root
@@ -46,7 +44,8 @@ class Trie (object):
             else:
                 return []
         self.output = []
-        self.dfs(node, searched_word[:-1])
+        for curr_node, curr_word in self.dfs(node, searched_word[:1]):
+            self.output.append([curr_word, curr_node.content])
         return self.output
 
     def search_exact_word(self, word: str) -> tuple:
