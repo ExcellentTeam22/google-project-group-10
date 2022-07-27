@@ -35,6 +35,7 @@ if __name__ == "__main__":
     print("done")
     tr = data.trie
     #print (tr.search ("here"))
-    print(tr.search_exact_word("here"))
-    print(tr.search_exact_word("hello"))
+    for res in tr.search("here"):
+        print(res)
+    #print(tr.search("hello"))
 
