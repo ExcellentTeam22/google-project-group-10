@@ -14,11 +14,15 @@ def get_best_k_completions(prefix: str, data: Data) -> List[AutoCompleteData]:
     files_hash = data.files_dic
     letter_trie = data.trie
     sentence_word_list = prefix.split()  # split sentence
-    findings_list = [letter_trie.searchExactWord(word) for word in sentence_word_list]
+    findings_list = [letter_trie.search(word) for word in sentence_word_list]
+    results = []
+    while resu
+    words = [next(gen) for gen in findings_list]
     # findings_list = [letter_trie.searchExactWord(word) for index, word in enumerate(sentence_word_list)
     #                 if index < len(sentence_word_list)-1]  # find each word in the trie
     # findings_list.append(letter_trie.search(sentence_word_list[-1]))
-    results = intersect([lst[1] for lst in findings_list if lst[1]])  # intersect between results
+    founds = [lst[1] for lst in findings_list if lst[1]]
+    results = intersect((item for item in founds))  # intersect between results
     fixed_sentence = ' '.join([res[0] for res in findings_list])  # build the new fixed sentence
     final_results = list(find_in_file(results, files_hash, fixed_sentence))  # creates user result list
     return final_results
@@ -62,5 +66,7 @@ if __name__ == "__main__":
             print('Here are 5 suggestions')
             for i, complete in enumerate(completions, 1):
                 print(i, '. ' + complete.completed_sentence,complete.source_text,complete.offset, sep='', end='\n')
+                if i > 4:
+                    break
         else:
             sentence = ''
