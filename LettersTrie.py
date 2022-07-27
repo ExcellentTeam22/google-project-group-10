@@ -34,36 +34,37 @@ class Trie (object):
     def dfs_sub_tries(self, node, pre):
         for child in node.children.values():
             for node, word in self.dfs_sub_tries(child, pre + node.char):
-                yield node, word
-        return
+                return node, word
 
     def search(self, searched_word, prefix: bool = False, start_node: TrieNode = None, penalty: int = 0):
         node = self.root if start_node is None else start_node
         ans = set()
+
         if searched_word == "":
             if len(node.content) != 0 and searched_word == "":
                 yield {(node.char, tuple(node.content))}
             if prefix:
                 for curr_node, curr_word_prefix in self.dfs_sub_tries(node, searched_word[:1]):
                     yield {(curr_word_prefix, curr_node.content)}
-            return ans
-        elif penalty < MAX_PENALTY:
-            for word in self.get_penaltied_words(searched_word, prefix, node, penalty):
-                yield word
+            return
         if searched_word[0] in node.children:
             for res in self.search(searched_word[1:], prefix, node.children[searched_word[0]], penalty):
                 yield res
 
+        if penalty < MAX_PENALTY:
+            for word in self.get_penaltied_words(searched_word, prefix, node, penalty):
+                yield word
+
     def get_penaltied_words(self, searched_word: str, prefix: bool, node: TrieNode, penalty: int):
         ans = set()
         for node_key in node.children:
-            # add char
-            for word in self.search(searched_word, prefix, node.children[node_key], penalty + 1):
-                yield word
             if searched_word != "" and node != searched_word[0]:
                 # switch char
                 for word in self.search(searched_word[1:], prefix, node.children[node_key], penalty + 1):
                     yield word
+            # add char
+            for word in self.search(searched_word, prefix, node.children[node_key], penalty + 1):
+                yield word
         # del char
         for word in self.search(searched_word[1:], prefix, node, penalty + 1):
             yield word
