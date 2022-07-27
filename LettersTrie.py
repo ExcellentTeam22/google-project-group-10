@@ -42,10 +42,10 @@ class Trie (object):
 
         if searched_word == "":
             if len(node.content) != 0 and searched_word == "":
-                yield {(node.char, tuple(node.content))}
+                yield node.char, tuple(node.content)
             if prefix:
                 for curr_node, curr_word_prefix in self.dfs_sub_tries(node, searched_word[:1]):
-                    yield {(curr_word_prefix, curr_node.content)}
+                    yield curr_word_prefix, curr_node.content
             return
         if searched_word[0] in node.children:
             for res in self.search(searched_word[1:], prefix, node.children[searched_word[0]], penalty):
