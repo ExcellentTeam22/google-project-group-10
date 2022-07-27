@@ -1,100 +1,69 @@
 from __future__ import annotations
 import numpy as np
 
-"""class LettersTrie:
-    def __init__(self, prev: LettersTrie = None):
-        self.next = {}
-        self.prev = prev
-        self.content = set()
-
-    def append(self, new_word: LettersTrie, path: str, line: str) -> None:
-        if len(new_word) == 0:
-            self.content.add(f"{path} \n {line}")
-        else:
-            if new_word[0] not in self.next:
-                self.next[new_word[0]] = LettersTrie(self)
-            self.next[new_word[0]].append(new_word[1:], path, line)
-
-    def get(self, word: str, distance: int = 0) -> list:
-        if word == "":
-            return self.content
-        if word[0] not in self.next:
-            return None
-        else:
-            return self.next[word[0]].get(word[1:])
-"""
-"""
-if __name__ == "__main__":
-    data = LettersTrie()
-    data.append("123", "111", "222")
-    data.append("123", "5555", "7777")
-    print(data.get("12"))"""
+MAX_PENALTY = 1
 
 
 class TrieNode:
-
-    def __init__(self, char):
+    def __init__(self, char: str, prev:TrieNode = None):
         self.char = char
-
-        self.is_end = False
-
         self.children = {}
         self.content = set()
+        self.prev = prev
+        self.is_common = False
 
 
-class Trie(object):
-
+class Trie (object):
     def __init__(self):
-
         self.root = TrieNode("")
+        self.words_counter = 0
 
     def insert(self, word, path: int, line: int) -> None:
-
         node = self.root
-
         for char in word:
             if char in node.children:
                 node = node.children[char]
             else:
-                new_node = TrieNode(char)
+                self.words_counter += 1
+                new_node = TrieNode(node.char + char, self)
                 node.children[char] = new_node
                 node = new_node
-        node.content.add(tuple(np.array([path, line], dtype='int64')))
-        node.is_end = True
+        node.content.add(tuple(np.array([path, line])))
+        node.is_common = True
 
-    def dfs(self, node, pre):
-
-        if node.is_end:
-            self.output.append([(pre + node.char), node.content])
-
+    def dfs_sub_tries(self, node, pre):
         for child in node.children.values():
-            self.dfs(child, pre + node.char)
+            for node, word in self.dfs_sub_tries(child, pre + node.char):
+                yield node, word
+        return
 
-    def search(self, x):
+    def search(self, searched_word, prefix: bool = False, start_node: TrieNode = None, penalty: int = 0):
+        node = self.root if start_node is None else start_node
+        ans = set()
+        if searched_word == "":
+            if len(node.content) != 0 and searched_word == "":
+                yield {(node.char, tuple(node.content))}
+            if prefix:
+                for curr_node, curr_word_prefix in self.dfs_sub_tries(node, searched_word[:1]):
+                    yield {(curr_word_prefix, curr_node.content)}
+            return ans
+        elif penalty < MAX_PENALTY:
+            for word in self.get_penaltied_words(searched_word, prefix, node, penalty):
+                yield word
+        if searched_word[0] in node.children:
+            for res in self.search(searched_word[1:], prefix, node.children[searched_word[0]], penalty):
+                yield res
 
-        node = self.root
-
-        for char in x:
-            if char in node.children:
-                node = node.children[char]
-            else:
-
-                return []
-
-        self.output = []
-        self.dfs(node, x[:-1])
-
-        return self.output
-
-    def searchExactWord(self, x):
-
-        node = self.root
-
-        for char in x:
-            if char in node.children:
-                node = node.children[char]
-            else:
-
-                return []
-
-        return (x, node.content)
+    def get_penaltied_words(self, searched_word: str, prefix: bool, node: TrieNode, penalty: int):
+        ans = set()
+        for node_key in node.children:
+            # add char
+            for word in self.search(searched_word, prefix, node.children[node_key], penalty + 1):
+                yield word
+            if searched_word != "" and node != searched_word[0]:
+                # switch char
+                for word in self.search(searched_word[1:], prefix, node.children[node_key], penalty + 1):
+                    yield word
+        # del char
+        for word in self.search(searched_word[1:], prefix, node, penalty + 1):
+            yield word
