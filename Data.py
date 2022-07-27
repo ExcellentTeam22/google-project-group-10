@@ -35,7 +35,9 @@ if __name__ == "__main__":
     print("done")
     tr = data.trie
     #print (tr.search ("here"))
-    for res in tr.search("here"):
-        print(res)
+    lst = [tr.search("Hello"), tr.search("world")]
+    gens = [next(gen) for gen in lst]
+    for word in gens:
+        print(word)
     #print(tr.search("hello"))
 
