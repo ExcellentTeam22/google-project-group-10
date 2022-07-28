@@ -7,7 +7,7 @@ from AutoCompleteData import AutoCompleteData
 from Data import Data
 from LettersTrie import Trie
 import linecache as lc
-
+import re
 
 def get_best_k_completions(prefix: str, data: Data) -> List[AutoCompleteData]:
     # here we find the 5 completions
@@ -17,8 +17,16 @@ def get_best_k_completions(prefix: str, data: Data) -> List[AutoCompleteData]:
     findings_list = [letter_trie.search(word) for word in sentence_word_list]
     results = []
     words = [next(gen) for gen in findings_list]
-    founds = [list(lst[1]) for lst in words]
-    results.extend(intersect([item for item in founds]))  # intersect between results
+
+    for i, gen in enumerate(findings_list):
+        if i > 0:
+            words[-1 - i] = next(letter_trie.search(sentence_word_list[-1 - i]))
+        for generated_word in gen:
+            words[i] = generated_word
+            founds = [list(lst[1]) for lst in words]
+            results.extend(intersect([item for item in founds]))  # intersect between results
+            if len (results) > 5:
+                break
     fixed_sentence = ' '.join([res[0] for res in words])  # build the new fixed sentence
     final_results = list(find_in_file(results, files_hash, fixed_sentence))  # creates user result list
     return final_results
@@ -62,7 +70,7 @@ if __name__ == "__main__":
             completions = get_best_k_completions(sentence, data)
             print('Here are 5 suggestions')
             for i, complete in enumerate(completions, 1):
-                print(i, '. ' + complete.completed_sentence,complete.source_text,complete.offset, sep='', end='\n')
+                print(i, '. ' + complete.completed_sentence, sep='', end='\n')
                 if i > 4:
                     break
         else:
