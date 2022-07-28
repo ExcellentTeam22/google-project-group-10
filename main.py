@@ -6,7 +6,7 @@ import numpy as np
 from AutoCompleteData import AutoCompleteData
 from Data import Data
 import linecache as lc
-
+import re
 
 def get_best_k_completions(prefix: str, data: Data) -> List[AutoCompleteData]:
     """ Get the best completions of a sentence that the user entered.
@@ -20,9 +20,18 @@ def get_best_k_completions(prefix: str, data: Data) -> List[AutoCompleteData]:
     sentence_word_list = prefix.split()  # split sentence
     findings_list = [letter_trie.search(word) for word in sentence_word_list]
     results = []
-    words = [next(words_gen) for words_gen in findings_list]
-    founds = [list(lst_of_words[1]) for lst_of_words in words]
-    results.extend(intersect([item for item in founds]))  # intersect between results
+
+    words = [next(gen) for gen in findings_list]
+
+    for i, gen in enumerate(findings_list):
+        if i > 0:
+            words[-1 - i] = next(letter_trie.search(sentence_word_list[-1 - i]))
+        for generated_word in gen:
+            words[i] = generated_word
+            founds = [list(lst[1]) for lst in words]
+            results.extend(intersect([item for item in founds]))  # intersect between results
+            if len (results) > 5:
+                break
     fixed_sentence = ' '.join([res[0] for res in words])  # build the new fixed sentence
     final_results = list(find_in_file(results, files_hash, fixed_sentence))  # creates user result list
     return final_results
@@ -52,6 +61,7 @@ def find_in_file(res: list, files_hash, fixed_sent: str):
     """
     list_of_results = []
 
+
     for item in res:
         no_row = item[1]
         line_to_check = lc.getline(files_hash[item[0]], no_row)
@@ -75,6 +85,7 @@ if __name__ == "__main__":
             for index, complete in enumerate(completions, 1):
                 print(index, '. ' + complete.completed_sentence, sep='', end='\n')
                 if index > 4:
+
                     break
         else:
             sentence = ''
