@@ -34,10 +34,14 @@ if __name__ == "__main__":
     data = Data()
     print("done")
     tr = data.trie
-    #print (tr.search ("here"))
-    lst = [tr.search("Hello"), tr.search("world")]
-    gens = [next(gen) for gen in lst]
-    for word in gens:
-        print(word)
-    #print(tr.search("hello"))
+
+    base = ["Hello", "Worl"]
+    gens = [tr.search(word) for word in base]
+    words = [next(gen) for gen in gens]
+
+    for i, gen in enumerate(gens):
+        if i > 0:
+            words[-1 - i] = next(tr.search(base[-1 - i]))
+        for generated_word in gen:
+            words[i] = generated_word
 
