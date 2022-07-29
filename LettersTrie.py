@@ -55,8 +55,8 @@ class Trie (object):
         :return:
         """
         for child in node.children.values():
-            for node in self.dfs_sub_tries(child):
-                yield node
+            for node, word in self.dfs_sub_tries(child, pre + node.char):
+                return node, word
 
     def search(self, searched_word, prefix: bool = False, start_node: TrieNode = None, penalty: int = 0):
         """
